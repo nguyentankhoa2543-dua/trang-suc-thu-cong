@@ -140,6 +140,7 @@
     </div>
   </section>
 
+  <div style="max-width:1152px;margin:10px auto;padding:0 16px;font-size:13px;color:#64748b"><span id="catalog-status" role="status" aria-live="polite"></span><button id="catalog-retry" hidden onclick="loadCatalogFromSheet()" style="margin-left:10px;text-decoration:underline">Thử lại</button></div>
   <!-- Lưới hiển thị danh sách sản phẩm -->
   <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
     <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -376,6 +377,7 @@
     function initApp() {
       document.querySelectorAll('[data-editor]').forEach(el => el.hidden = CUSTOMER_MODE);
       applyShopConfig();
+      if(CUSTOMER_MODE && typeof startSheetCatalog === "function") { startSheetCatalog(); return; }
       renderCategories();
       renderProducts();
       if(window.lucide) lucide.createIcons();
@@ -477,7 +479,7 @@
                 <button type="button" onclick="openProductDetail(${products.indexOf(p)})" style="text-align:left;cursor:pointer">${esc(p.name)}</button>
               </h3>
               <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed flex-1">
-                ${esc(p.desc || 'Liên hệ để được tư vấn kích thước và chi tiết sản phẩm.')}
+                ${esc((p.subtitle || p.desc || 'Liên hệ để được tư vấn kích thước và chi tiết sản phẩm.').slice(0,160))}
               </p>
 
               <button type="button" onclick="openProductDetail(${products.indexOf(p)})" class="text-blue-600 text-xs font-semibold mt-3 text-left">Xem chi tiết sản phẩm →</button>
@@ -729,5 +731,6 @@
     // Khởi chạy
     window.addEventListener('DOMContentLoaded', initApp);
   </script>
+  <script src="catalog.js"></script>
 </body>
 </html>
