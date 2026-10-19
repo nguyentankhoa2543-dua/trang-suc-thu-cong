@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang sức thủ công - Liên hệ đặt hàng</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  a[aria-disabled="true"] {opacity:.5;cursor:default;} [hidden]{display:none!important;}
+  .product-detail{grid-column:1/-1;background:white;border:1px solid #d9dce2;border-radius:18px;padding:clamp(18px,4vw,36px);margin-top:20px}.product-detail h2{font-size:clamp(24px,4vw,36px);font-weight:700;color:#793d20}.detail-kicker{font-size:18px;margin:8px 0 24px;color:#8c6236}.detail-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.detail-gallery figure:last-child{grid-column:1/-1}.detail-gallery img{width:100%;height:auto;border-radius:12px}.detail-gallery figcaption{font-size:12px;color:#64748b;margin-top:6px}.detail-copy{white-space:pre-wrap;line-height:1.85;max-width:800px;margin-top:26px}.detail-gallery figure{margin:0}@media(max-width:600px){.detail-gallery{grid-template-columns:1fr}}
+      /* Avoid the overlapping decorative box visible in the previous screenshot. */
+      .hidden.lg\:flex.absolute.right-12{display:none!important}
+      #brand-name{max-width:360px;font-size:16px;line-height:1.4}header .group{min-width:0}header .group>div:last-child{min-width:0}@media(max-width:640px){#brand-name{font-size:12px;max-width:190px}header .max-w-6xl{gap:6px}}
+[data-editor],#config-modal,#admin-modal{display:none!important}</style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <div data-editor style="background:#fff5d9;padding:12px 20px;font:14px/1.6 system-ui;color:#574622">
+    <strong>Bản quản lý trên máy:</strong> sửa sản phẩm và thông tin cửa hàng, sau đó xuất file cho khách và tải file đó lên GitHub. Thay đổi ở đây chưa tự cập nhật lên web.
+    <button onclick="exportCustomer()" style="margin:6px;padding:7px 12px;border:1px solid #8d7547;border-radius:6px">Xuất trang cho khách</button>
+    <button onclick="exportBackup()" style="margin:6px;padding:7px 12px;border:1px solid #8d7547;border-radius:6px">Sao lưu dữ liệu</button>
+    <label style="cursor:pointer;text-decoration:underline">Khôi phục dữ liệu<input type="file" accept=".json,application/json" id="restore-file" style="display:none"></label>
+  </div>
+  <!-- Thanh thông báo đầu trang -->
+  <div class="bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 text-white text-xs sm:text-sm font-medium py-2 px-4 shadow-sm">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 text-center sm:text-left">
+      <div class="flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-300 animate-pulse"></i>
+        <span>Vòng tay đá · Pha lê · Trang sức hạt thủ công</span>
+      </div>
+      <div class="flex items-center gap-4 text-blue-100 text-xs">
+        <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> Liên hệ để được tư vấn</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header chính -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/95">
+    <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-4">
+      <!-- Tên Shop & Slogan -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-md group-hover:scale-105 transition-transform">
+          <i data-lucide="store" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 id="brand-name" class="font-bold text-lg sm:text-xl text-slate-900 leading-tight">TRANG SỨC THỦ CÔNG</h1>
+          <p id="brand-slogan" class="text-xs text-slate-500">Vòng tay đá · Pha lê · Hạt thủ công</p>
+        </div>
+      </a>
+
+      <!-- Ô tìm kiếm nhanh (Desktop) -->
+      <div class="hidden md:flex flex-1 max-w-md mx-4">
+        <div class="relative w-full">
+          <input type="text" id="search-input" placeholder="Tìm sản phẩm bạn cần..." 
+                 class="w-full pl-10 pr-4 py-2 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-slate-50 focus:bg-white transition-all">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        </div>
+      </div>
+
+      <!-- Hotline & Nút Quản lý -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button data-editor onclick="openConfigModal()" title="Cài đặt thông tin cửa hàng" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
+
+        <a id="header-phone-btn" href="tel:" class="hidden sm:inline-flex items-center gap-2 bg-red-50 text-red-600 border border-red-200 font-semibold px-3.5 py-1.5 rounded-full text-sm hover:bg-red-100 transition-colors">
+          <i data-lucide="phone-call" class="w-4 h-4"></i>
+          <span id="header-phone-text">Chưa có số liên hệ</span>
+        </a>
+
+        <button data-editor onclick="openAdminModal()" class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg transition-colors shadow-sm">
+          <i data-lucide="boxes" class="w-4 h-4"></i>
+          <span>Quản lý kho</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Thanh tìm kiếm Mobile -->
+    <div class="md:hidden px-4 pb-3">
+      <div class="relative w-full">
+        <input type="text" id="mobile-search-input" placeholder="Tìm kiếm sản phẩm..." 
+               class="w-full pl-9 pr-4 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      </div>
+    </div>
+  </header>
+
+  <section style="max-width:1152px;margin:18px auto 0;padding:0 16px"><div style="background:#fff7e8;border:1px solid #e5d4ae;border-radius:12px;padding:18px 22px"><strong>Nhận đặt vòng theo yêu cầu</strong><p style="margin:6px 0">Bạn có thể trao đổi màu sắc, loại hạt và kích thước cổ tay mong muốn. Cửa hàng sẽ tư vấn mẫu phối và báo giá trước khi chốt đơn.</p><a data-zalo href="https://zalo.me/0901559286" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8;font-weight:600">Nhắn Zalo để trao đổi mẫu riêng ↗</a></div></section>
+  <!-- Banner thông tin cửa hàng -->
+  <section class="max-w-6xl mx-auto px-4 mt-4 sm:mt-6">
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 text-white p-6 sm:p-8 shadow-xl">
+      <div class="relative z-10 max-w-2xl">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 mb-3">
+          <i data-lucide="tag" class="w-3.5 h-3.5"></i> Trang sức hạt thủ công
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-2">Chọn một chiếc vòng, kể một nét riêng</h2>
+        <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
+          Xem chi tiết sản phẩm, chọn mẫu ưng ý và nhấn gọi Hotline hoặc chat Zalo để nhận tư vấn & chốt đơn ngay lập tức.
+        </p>
+        <div class="flex flex-wrap items-center gap-3">
+          <a data-zalo id="banner-zalo-btn" href="https://zalo.me/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-xl text-sm transition-all shadow-md">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> Chat Zalo Ngay
+          </a>
+          <a id="banner-phone-btn" href="tel:" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-medium px-4 py-2 rounded-xl text-sm border border-white/20 transition-all">
+            <i data-lucide="phone" class="w-4 h-4"></i> Gọi Tư Vấn
+          </a>
+        </div>
+      </div>
+      <!-- Trang trí thẻ phụ -->
+      <div class="hidden lg:flex absolute right-12 top-1/2 -translate-y-1/2 flex-col gap-3">
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl text-center w-48 shadow-lg">
+          <i data-lucide="truck" class="w-6 h-6 text-amber-300 mx-auto mb-1"></i>
+          <h4 class="text-sm font-semibold">Thông tin sản phẩm</h4>
+          <p class="text-xs text-slate-300 mt-0.5">Trao đổi trực tiếp với cửa hàng</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Danh mục bộ lọc & Thống kê sản phẩm -->
+  <section class="max-w-6xl mx-auto px-4 mt-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+      <!-- Bộ lọc danh mục -->
+      <div id="category-filter-container" class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+        <button onclick="filterCategory('all')" class="cat-pill active px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap bg-blue-600 text-white">
+          Tất cả sản phẩm
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-500 font-medium">
+        Hiển thị: <span id="product-count" class="font-bold text-slate-800">0</span> sản phẩm
+      </div>
+    </div>
+  </section>
+
+  <!-- Lưới hiển thị danh sách sản phẩm -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
+    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <!-- Các thẻ sản phẩm được render động từ JavaScript -->
+    </div>
+
+    <!-- Thông báo khi không có sản phẩm -->
+    <div id="empty-state" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300 mt-4">
+      <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-3">
+        <i data-lucide="package-search" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-base font-semibold text-slate-800">Không tìm thấy sản phẩm nào!</h3>
+      <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">Chưa có sản phẩm phù hợp. Bạn có thể thử từ khóa khác.</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-8 text-sm text-slate-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="font-bold text-slate-800 text-base" id="footer-brand">TRANG SỨC THỦ CÔNG</p>
+        <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span id="footer-address">Chưa có địa chỉ cửa hàng</span>
+        </p>
+      </div>
+      <div class="text-xs text-center md:text-right">
+        <p>© 2026 Bản quyền thuộc về cửa hàng. Thiết kế tối ưu cho điện thoại.</p>
+        <p class="mt-1 text-slate-400">Hỗ trợ đặt hàng nhanh qua Zalo & Hotline</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Nút bấm nổi cố định góc màn hình (Floating Action Buttons) -->
+  <div class="fixed bottom-6 right-4 sm:right-6 flex flex-col gap-3 z-40">
+    <!-- Nút Zalo Nổi -->
+    <a data-zalo id="float-zalo-btn" href="https://zalo.me/" target="_blank" rel="noopener noreferrer" 
+       class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 text-xs sm:text-sm">
+      <div class="w-6 h-6 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xs">
+        <i data-lucide="message-circle" class="w-4 h-4"></i>
+      </div>
+      <span class="font-semibold">Mở Zalo</span>
+    </a>
+
+    <!-- Nút Gọi Hotline Nổi -->
+    <a id="float-phone-btn" href="tel:" 
+       class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 text-xs sm:text-sm animate-bounce">
+      <div class="w-6 h-6 rounded-full bg-white text-red-600 flex items-center justify-center">
+        <i data-lucide="phone" class="w-3.5 h-3.5 fill-current"></i>
+      </div>
+      <span class="font-semibold">Gọi Hotline</span>
+    </a>
+  </div>
+
+  <!-- MODAL: Cài đặt thông tin cửa hàng -->
+  <div id="config-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-blue-600"></i> Cài Đặt Thông Tin Shop
+        </h3>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="config-form" class="p-6 space-y-4" onsubmit="saveShopConfig(event)">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tên Cửa Hàng</label>
+          <input type="text" id="cfg-shop-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Slogan / Giới thiệu ngắn</label>
+          <input type="text" id="cfg-shop-slogan" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Số Hotline Gọi Điện</label>
+            <input type="text" id="cfg-phone" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Số Zalo Nhận Tin Nhắn</label>
+            <input type="text" id="cfg-zalo" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Địa chỉ Shop</label>
+          <input type="text" id="cfg-address" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeConfigModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">Hủy</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm">Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Quản lý sản phẩm (Thêm/Sửa/Xóa) -->
+  <div id="admin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] shadow-2xl flex flex-col overflow-hidden">
+      <!-- Tiêu đề modal -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+            <i data-lucide="package-plus" class="w-5 h-5 text-blue-600"></i> Quản Lý Danh Sách Hàng Hóa
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">Lưu trên máy này. Sau khi sửa, xuất lại trang cho khách rồi tải lên GitHub.</p>
+        </div>
+        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6 flex-1">
+        <!-- Form thêm/sửa sản phẩm -->
+        <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+          <h4 id="form-action-title" class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-blue-600"></i> Thêm Sản Phẩm Mới
+          </h4>
+          <form id="product-form" onsubmit="handleProductSubmit(event)" class="space-y-3">
+            <input type="hidden" id="prod-id">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Tên sản phẩm *</label>
+                <input type="text" id="prod-name" required placeholder="Ví dụ: Vòng tay pha lê tím" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Giá bán (VNĐ) — để trống nếu báo giá sau</label>
+                <input type="number" min="0" step="1" id="prod-price" placeholder="Ví dụ: 1250000" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-medium text-slate-700 mb-1">Link Ảnh Sản Phẩm (URL) *</label>
+                <input type="text" id="prod-image" required placeholder="https://images.unsplash.com/photo-..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Danh mục</label>
+                <input type="text" id="prod-category" placeholder="Ví dụ: Vòng tay đá, Pha lê..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">Mô tả tóm tắt sản phẩm</label>
+              <textarea id="prod-desc" rows="2" placeholder="Chất liệu, màu, kích thước hạt, vòng tay..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="prod-badge" class="rounded text-blue-600 focus:ring-blue-500">
+                <label for="prod-badge" class="text-xs text-slate-600 select-none">Đánh dấu nhãn "Bán Chạy"</label>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" id="btn-cancel-edit" onclick="resetProductForm()" class="hidden px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg hover:bg-white text-slate-600">Hủy sửa</button>
+                <button type="submit" id="btn-submit-prod" class="px-4 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm">Lưu Sản Phẩm</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Bảng danh sách hàng hóa hiện có -->
+        <div>
+          <h4 class="font-bold text-sm text-slate-800 mb-2">Danh sách kho hiện có</h4>
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3">Ảnh</th>
+                  <th class="py-2.5 px-3">Tên sản phẩm</th>
+                  <th class="py-2.5 px-3">Giá</th>
+                  <th class="py-2.5 px-3">Danh mục</th>
+                  <th class="py-2.5 px-3 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body" class="divide-y divide-slate-100">
+                <!-- Danh sách quản lý render từ JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div id="product-detail-modal" hidden role="dialog" aria-modal="true" aria-label="Chi tiết sản phẩm" onclick="if(event.target===this)closeProductDetail()" style="position:fixed;inset:0;background:#0f172acc;z-index:80;display:flex;align-items:center;justify-content:center;padding:16px">
+<div style="background:white;border-radius:16px;width:min(960px,100%);max-height:92vh;overflow-y:auto">
+<div style="position:sticky;top:0;z-index:1;background:white;padding:12px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center"><strong>Chi tiết sản phẩm</strong><button id="detail-close" onclick="closeProductDetail()" aria-label="Đóng chi tiết" style="padding:6px 12px;font-size:24px">×</button></div>
+<div id="product-detail-content"></div></div></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // Dữ liệu mặc định ban đầu
+    const PUBLISHED_DATA = {"config": {"name": "Cửa hàng TRANG SỨC THỦ CÔNG - PHA LÊ Swarovski - VÒNG TAY ĐÁ", "slogan": "Trang sức mang dấu ấn riêng – Nhận thiết kế, phối hạt theo yêu cầu", "phone": "0901559286", "zalo": "0901559286", "address": ""}, "products": [{"id": "hoa-vuong-sinh-tho", "name": "HỎA VƯỢNG SINH THỔ", "price": null, "category": "Vòng tay đá", "badge": "", "image": "san-pham-1.png", "images": ["san-pham-1.png", "san-pham-2.png", "san-pham-3.png"], "desc": "Lửa rèn bản lĩnh – Đất giữ bình an\n\nĐàn ông, ai cũng có một ngọn lửa trong lòng.\n\nĐó là khát vọng vươn lên, là những lần không chịu khuất phục trước khó khăn, là ý chí bước tiếp dù cuộc đời có bao lần thử thách.\n\nNhưng lửa cháy mãi cũng cần một nơi để trở về.\n\nĐất không rực rỡ như lửa, nhưng đủ vững vàng để nâng đỡ những bước chân. Đất tượng trưng cho sự kiên định, bình an và những giá trị bền lâu.\n\nLấy cảm hứng từ quy luật Hỏa sinh Thổ trong ngũ hành, chiếc vòng được phối từ 17 viên đá với sáu sắc thái tự nhiên:\n\n• 1 viên mã não huyết xanh 14 mm: tâm điểm của bản lĩnh và khát vọng.\n• 2 viên thạch anh khói 11 mm: sự điềm tĩnh giữa những biến động.\n• 3 viên mắt hổ vàng 12 mm: biểu tượng của tự tin và quyết đoán.\n• 5 viên san hô hóa thạch 12 mm: ngọn lửa nhiệt huyết và hành động.\n• 3 viên thạch anh tím 12 mm: sự sâu sắc và tỉnh táo.\n• 3 viên gỗ hóa thạch 12 mm: sự bền bỉ và vững vàng theo năm tháng.\n\nLửa cho ta sức mạnh để tiến lên. Đất cho ta sự vững vàng để không lạc lối.\n\nMột chiếc vòng không chỉ để làm đẹp cổ tay, mà còn để nhắc mình: Sống có nhiệt huyết, hành động có bản lĩnh và giữ trong lòng một khoảng bình an.\n\nHỎA VƯỢNG SINH THỔ – Dành cho người đàn ông biết cháy hết mình, nhưng luôn vững vàng trước cuộc đời.", "subtitle": "Lửa rèn bản lĩnh – Đất giữ bình an", "imageLabels": ["Ảnh sản phẩm thực tế", "Ảnh sản phẩm thực tế", "Poster giới thiệu — hình minh họa sản phẩm"]}, {"id": "tho-sinh-kim", "name": "THỔ SINH KIM", "subtitle": "Vững chắc từ nền tảng", "price": null, "category": "Vòng tay đá", "badge": "", "image": "san-pham-4.png", "images": ["san-pham-4.png"], "imageLabels": ["Poster giới thiệu — hình minh họa sản phẩm"], "desc": "Có những người đàn ông không cần tỏa sáng ồn ào. Bởi bản lĩnh thật sự được tạo nên từ những tháng năm kiên trì và vững bước.\n\nLấy cảm hứng từ quy luật ngũ hành Thổ sinh Kim, chiếc vòng kết hợp 17 viên đá với ba sắc màu trầm ấm:\n\n• 8 viên mắt hổ vàng 12 mm: tượng trưng cho sự tự tin và quyết đoán.\n• 5 viên gỗ hóa thạch 12 mm: gợi nhắc sự bền bỉ, vững vàng.\n• 4 viên thạch anh khói 11 mm: biểu tượng của sự điềm tĩnh và cân bằng.\n\nKhông chỉ là món trang sức nam tính, mỗi chiếc vòng còn mang một câu chuyện về bản lĩnh, sự trưởng thành và khát vọng tiến về phía trước.\n\nTHỔ SINH KIM – Bản lĩnh không đến từ may mắn, mà được xây dựng từ nền tảng vững vàng.\n\nNhắn tin để được tư vấn và lựa chọn vòng đá phù hợp."}]};
+    const CUSTOMER_MODE = true;
+    const DEFAULT_CONFIG = {
+      name: "Cửa hàng TRANG SỨC THỦ CÔNG - PHA LÊ Swarovski - VÒNG TAY ĐÁ",
+      slogan: "Trang sức mang dấu ấn riêng – Nhận thiết kế, phối hạt theo yêu cầu",
+      phone: "0901559286", zalo: "0901559286", address: ""
+    };
+    const DEFAULT_PRODUCTS = [{"id": "hoa-vuong-sinh-tho", "name": "HỎA VƯỢNG SINH THỔ", "price": null, "category": "Vòng tay đá", "badge": "", "image": "san-pham-1.png", "images": ["san-pham-1.png", "san-pham-2.png", "san-pham-3.png"], "desc": "Lửa rèn bản lĩnh – Đất giữ bình an\n\nĐàn ông, ai cũng có một ngọn lửa trong lòng.\n\nĐó là khát vọng vươn lên, là những lần không chịu khuất phục trước khó khăn, là ý chí bước tiếp dù cuộc đời có bao lần thử thách.\n\nNhưng lửa cháy mãi cũng cần một nơi để trở về.\n\nĐất không rực rỡ như lửa, nhưng đủ vững vàng để nâng đỡ những bước chân. Đất tượng trưng cho sự kiên định, bình an và những giá trị bền lâu.\n\nLấy cảm hứng từ quy luật Hỏa sinh Thổ trong ngũ hành, chiếc vòng được phối từ 17 viên đá với sáu sắc thái tự nhiên:\n\n• 1 viên mã não huyết xanh 14 mm: tâm điểm của bản lĩnh và khát vọng.\n• 2 viên thạch anh khói 11 mm: sự điềm tĩnh giữa những biến động.\n• 3 viên mắt hổ vàng 12 mm: biểu tượng của tự tin và quyết đoán.\n• 5 viên san hô hóa thạch 12 mm: ngọn lửa nhiệt huyết và hành động.\n• 3 viên thạch anh tím 12 mm: sự sâu sắc và tỉnh táo.\n• 3 viên gỗ hóa thạch 12 mm: sự bền bỉ và vững vàng theo năm tháng.\n\nLửa cho ta sức mạnh để tiến lên. Đất cho ta sự vững vàng để không lạc lối.\n\nMột chiếc vòng không chỉ để làm đẹp cổ tay, mà còn để nhắc mình: Sống có nhiệt huyết, hành động có bản lĩnh và giữ trong lòng một khoảng bình an.\n\nHỎA VƯỢNG SINH THỔ – Dành cho người đàn ông biết cháy hết mình, nhưng luôn vững vàng trước cuộc đời.", "subtitle": "Lửa rèn bản lĩnh – Đất giữ bình an", "imageLabels": ["Ảnh sản phẩm thực tế", "Ảnh sản phẩm thực tế", "Poster giới thiệu — hình minh họa sản phẩm"]}, {"id": "tho-sinh-kim", "name": "THỔ SINH KIM", "subtitle": "Vững chắc từ nền tảng", "price": null, "category": "Vòng tay đá", "badge": "", "image": "san-pham-4.png", "images": ["san-pham-4.png"], "imageLabels": ["Poster giới thiệu — hình minh họa sản phẩm"], "desc": "Có những người đàn ông không cần tỏa sáng ồn ào. Bởi bản lĩnh thật sự được tạo nên từ những tháng năm kiên trì và vững bước.\n\nLấy cảm hứng từ quy luật ngũ hành Thổ sinh Kim, chiếc vòng kết hợp 17 viên đá với ba sắc màu trầm ấm:\n\n• 8 viên mắt hổ vàng 12 mm: tượng trưng cho sự tự tin và quyết đoán.\n• 5 viên gỗ hóa thạch 12 mm: gợi nhắc sự bền bỉ, vững vàng.\n• 4 viên thạch anh khói 11 mm: biểu tượng của sự điềm tĩnh và cân bằng.\n\nKhông chỉ là món trang sức nam tính, mỗi chiếc vòng còn mang một câu chuyện về bản lĩnh, sự trưởng thành và khát vọng tiến về phía trước.\n\nTHỔ SINH KIM – Bản lĩnh không đến từ may mắn, mà được xây dựng từ nền tảng vững vàng.\n\nNhắn tin để được tư vấn và lựa chọn vòng đá phù hợp."}];
+
+    // Quản lý State
+    function readLocal(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; }
+    }
+    function saveLocal(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); }
+      catch { alert('Không lưu được trên trình duyệt. Hãy xuất bản sao để giữ dữ liệu.'); }
+    }
+    const STORE_KEY = 'jewelry_editor_v1';
+    let shopConfig = PUBLISHED_DATA ? PUBLISHED_DATA.config : readLocal(STORE_KEY + '_config', DEFAULT_CONFIG);
+    let products = PUBLISHED_DATA ? PUBLISHED_DATA.products : readLocal(STORE_KEY + '_products', DEFAULT_PRODUCTS);
+    if(!CUSTOMER_MODE && !PUBLISHED_DATA && !readLocal(STORE_KEY+'_hoa_vuong_seeded', false)) {
+      if(!products.some(p=>p.id==='hoa-vuong-sinh-tho')) products.push(DEFAULT_PRODUCTS[0]);
+      saveLocal(STORE_KEY+'_products',products);
+      saveLocal(STORE_KEY+'_hoa_vuong_seeded',true);
+    }
+    if(!CUSTOMER_MODE && !PUBLISHED_DATA && !readLocal(STORE_KEY+'_contact_20261019', false)) {
+      shopConfig = {...shopConfig, name: DEFAULT_CONFIG.name, phone: DEFAULT_CONFIG.phone, zalo: DEFAULT_CONFIG.zalo};
+      saveLocal(STORE_KEY+'_config',shopConfig);
+      saveLocal(STORE_KEY+'_contact_20261019',true);
+    }
+    if(!CUSTOMER_MODE && !PUBLISHED_DATA && !readLocal(STORE_KEY+'_tho_kim_20261019', false)) {
+      if(!products.some(p=>p.id==='tho-sinh-kim')) products.push(DEFAULT_PRODUCTS.find(p=>p.id==='tho-sinh-kim'));
+      shopConfig={...shopConfig,slogan:DEFAULT_CONFIG.slogan};
+      saveLocal(STORE_KEY+'_products',products);
+      saveLocal(STORE_KEY+'_config',shopConfig);
+      saveLocal(STORE_KEY+'_tho_kim_20261019',true);
+    }
+    let currentCategory = 'all';
+    let searchQuery = '';
+
+    // Khởi tạo ứng dụng
+    function initApp() {
+      document.querySelectorAll('[data-editor]').forEach(el => el.hidden = CUSTOMER_MODE);
+      applyShopConfig();
+      renderCategories();
+      renderProducts();
+      if(window.lucide) lucide.createIcons();
+    }
+
+    // Cập nhật giao diện theo cấu hình
+    function applyShopConfig() {
+      document.getElementById('brand-name').innerText = shopConfig.name;
+      document.getElementById('footer-brand').innerText = shopConfig.name;
+      document.getElementById('brand-slogan').innerText = shopConfig.slogan || '';
+      document.getElementById('header-phone-text').innerText = formatPhoneNumber(shopConfig.phone) || 'Chưa có số liên hệ';
+      document.getElementById('header-phone-btn').href = 'tel:' + shopConfig.phone;
+      document.getElementById('banner-phone-btn').href = 'tel:' + shopConfig.phone;
+      document.getElementById('banner-zalo-btn').href = 'https://zalo.me/' + shopConfig.zalo;
+      document.getElementById('float-phone-btn').href = 'tel:' + shopConfig.phone;
+      document.getElementById('float-zalo-btn').href = 'https://zalo.me/' + shopConfig.zalo;
+      document.getElementById('footer-address').innerText = shopConfig.address || 'Liên hệ cửa hàng để biết thêm thông tin';
+      document.title=shopConfig.name + ' - Trang sức thủ công';
+      contactButtons();
+    }
+
+    function formatPhoneNumber(num) {
+      if(!num) return '';
+      return num.replace(/(\d{4})(\d{3})(\d{3})/, '$1.$2.$3');
+    }
+
+    function formatMoney(num) {
+      return num === null || num === undefined || num === '' ? 'Liên hệ báo giá' : new Intl.NumberFormat('vi-VN').format(num) + ' đ';
+    }
+
+    function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function validImage(v) { if(/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/=]+$/.test(v)) return v; try { const u=new URL(v, document.baseURI); return ['http:','https:'].includes(u.protocol) ? u.href : ''; } catch { return ''; } }
+    function contactButtons() {
+      const phone=String(shopConfig.phone||'').replace(/[^+0-9]/g,'');
+      const zalo=String(shopConfig.zalo||'').replace(/[^0-9]/g,'');
+      document.querySelectorAll('a[href^="tel:"]').forEach(a => { if(phone) {a.href='tel:'+phone; a.removeAttribute('aria-disabled');} else {a.removeAttribute('href');a.setAttribute('aria-disabled','true');a.title='Chưa có số liên hệ';} });
+      document.querySelectorAll('a[data-zalo]').forEach(a => { if(zalo) {a.href='https://zalo.me/'+zalo; a.removeAttribute('aria-disabled');} else {a.removeAttribute('href');a.setAttribute('aria-disabled','true');a.title='Chưa có số Zalo';} });
+    }
+    // Hiển thị danh mục
+    function renderCategories() {
+      const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
+      const container = document.getElementById('category-filter-container');
+      container.innerHTML = categories.map((cat, catIndex) => {
+        const isAll = cat === 'all';
+        const label = isAll ? 'Tất cả sản phẩm' : cat;
+        const activeClass = (cat === currentCategory) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200';
+        return `
+          <button onclick="filterCategoryByIndex(${catIndex})" class="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${activeClass}">
+            ${esc(label)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function filterCategoryByIndex(i) { filterCategory(['all', ...new Set(products.map(p=>p.category).filter(Boolean))][i]); }
+    function filterCategory(cat) {
+      currentCategory = cat;
+      renderCategories();
+      renderProducts();
+    }
+
+    // Render danh sách sản phẩm
+    function renderProducts() {
+      const grid = document.getElementById('product-grid');
+      const empty = document.getElementById('empty-state');
+
+      let filtered = products.filter(p => {
+        const matchCat = (currentCategory === 'all') || (p.category === currentCategory);
+        const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            (p.desc && p.desc.toLowerCase().includes(searchQuery.toLowerCase()));
+        return matchCat && matchSearch;
+      });
+
+      document.getElementById('product-count').innerText = filtered.length;
+
+      if(filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      grid.innerHTML = filtered.map(p => {
+        const zaloText = encodeURIComponent(`Chào shop, tôi muốn hỏi mua sản phẩm: "${esc(p.name)}" (Giá: ${formatMoney(p.price)}). Vui lòng tư vấn cho tôi.`);
+        const zaloLink = "https://zalo.me/" + String(shopConfig.zalo || "").replace(/[^0-9]/g, "");
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group">
+            <!-- Hình ảnh -->
+            <button type="button" onclick="openProductDetail(${products.indexOf(p)})" aria-label="Xem chi tiết ${esc(p.name)}" class="relative w-full pt-[85%] bg-slate-100 overflow-hidden text-left" style="display:block;border:0;cursor:pointer">
+              <img src="${esc(validImage(p.image))}" alt="${esc(p.name)}" loading="lazy" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              ${p.badge ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">${esc(p.badge)}</span>` : ''}
+              ${p.category ? `<span class="absolute top-2 right-2 bg-slate-900/60 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-md">${esc(p.category)}</span>` : ''}
+            </button>
+
+            <!-- Thông tin -->
+            <div class="p-3.5 sm:p-4 flex flex-col flex-1">
+              <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors" title="${esc(p.name)}">
+                <button type="button" onclick="openProductDetail(${products.indexOf(p)})" style="text-align:left;cursor:pointer">${esc(p.name)}</button>
+              </h3>
+              <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed flex-1">
+                ${esc(p.desc || 'Liên hệ để được tư vấn kích thước và chi tiết sản phẩm.')}
+              </p>
+
+              <button type="button" onclick="openProductDetail(${products.indexOf(p)})" class="text-blue-600 text-xs font-semibold mt-3 text-left">Xem chi tiết sản phẩm →</button>
+              <!-- Giá tiền -->
+              <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-baseline justify-between">
+                <div>
+                  <span class="text-xs text-slate-400 font-medium">Giá bán:</span>
+                  <div class="text-base sm:text-lg font-extrabold text-red-600">${formatMoney(p.price)}</div>
+                </div>
+              </div>
+
+              <!-- Nút bấm đặt hàng trực tiếp -->
+              <div class="grid grid-cols-2 gap-2 mt-3 pt-1">
+                <a data-zalo href="${zaloLink}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 font-semibold text-xs py-2 rounded-xl transition-all">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                  <span>Mở Zalo</span>
+                </a>
+                <a href="tel:${esc(String(shopConfig.phone || '').replace(/[^+0-9]/g,''))}" class="flex items-center justify-center gap-1.5 bg-red-600 text-white hover:bg-red-700 font-semibold text-xs py-2 rounded-xl transition-all shadow-sm">
+                  <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+                  <span>Gọi Ngay</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+
+      contactButtons();
+      if(window.lucide) lucide.createIcons();
+    }
+
+
+    let detailTrigger = null;
+    function openProductDetail(index) {
+      const p=products[index]; if(!p) return;
+      detailTrigger=document.activeElement;
+      const modal=document.getElementById('product-detail-modal');
+      document.getElementById('product-detail-content').innerHTML='<section class="product-detail"><h2>'+esc(p.name)+'</h2><p class="detail-kicker">'+esc(p.subtitle || '')+'</p><div class="detail-gallery">'+(p.images || [p.image]).map((src,i)=>'<figure><a href="'+esc(validImage(src))+'" target="_blank" rel="noopener"><img src="'+esc(validImage(src))+'" alt="'+esc(p.name)+' — '+((p.imageLabels || [])[i] || (p.id==='tho-sinh-kim'?'Poster giới thiệu':(i===2?'Poster giới thiệu':'Ảnh thực tế '+(i+1))))+'" loading="lazy"></a><figcaption>'+esc((p.imageLabels || [])[i] || (p.id==='tho-sinh-kim'?'Poster giới thiệu — hình minh họa sản phẩm':(i===2?'Poster giới thiệu — hình minh họa sản phẩm':'Ảnh sản phẩm thực tế')))+'</figcaption></figure>').join('')+'</div><div class="detail-copy">'+esc(p.desc)+'</div></section>';
+      document.getElementById('product-detail-content').insertAdjacentHTML('beforeend',
+        '<div style="padding:0 24px 26px"><strong>'+formatMoney(p.price)+'</strong><p style="margin:10px 0">Liên hệ để được tư vấn mẫu và kích thước vòng.</p><a data-zalo href="https://zalo.me/'+String(shopConfig.zalo||'').replace(/[^0-9]/g,'')+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 18px;background:#2563eb;border-radius:8px;color:white">Tư vấn qua Zalo</a></div>');
+      contactButtons();
+      modal.hidden=false; document.body.style.overflow='hidden';
+      document.getElementById('detail-close').focus();
+    }
+    function closeProductDetail() {
+      document.getElementById('product-detail-modal').hidden=true;
+      document.body.style.overflow='';
+      if(detailTrigger && detailTrigger.isConnected) detailTrigger.focus();
+    }
+    document.addEventListener('keydown',e=>{
+      const modal=document.getElementById('product-detail-modal');
+      if(modal.hidden) return;
+      if(e.key==='Escape') closeProductDetail();
+      if(e.key==='Tab'){
+        const focusable=[...modal.querySelectorAll('button,a[href],input,select,textarea,[tabindex="0"]')];
+        const first=focusable[0],last=focusable[focusable.length-1];
+        if(e.shiftKey && document.activeElement===first){e.preventDefault();last.focus();}
+        else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first.focus();}
+      }
+    });
+
+    // Lắng nghe tìm kiếm
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderProducts();
+    });
+    document.getElementById('mobile-search-input').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderProducts();
+    });
+
+    // Quản lý Modal Cấu Hình
+    function openConfigModal() {
+      if(CUSTOMER_MODE) return;
+      document.getElementById('cfg-shop-name').value = shopConfig.name;
+      document.getElementById('cfg-shop-slogan').value = shopConfig.slogan || '';
+      document.getElementById('cfg-phone').value = shopConfig.phone;
+      document.getElementById('cfg-zalo').value = shopConfig.zalo;
+      document.getElementById('cfg-address').value = shopConfig.address || '';
+      document.getElementById('config-modal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('config-modal').classList.add('hidden');
+    }
+
+    function saveShopConfig(e) {
+      e.preventDefault();
+      shopConfig = {
+        name: document.getElementById('cfg-shop-name').value.trim(),
+        slogan: document.getElementById('cfg-shop-slogan').value.trim(),
+        phone: document.getElementById('cfg-phone').value.trim(),
+        zalo: document.getElementById('cfg-zalo').value.trim(),
+        address: document.getElementById('cfg-address').value.trim()
+      };
+      saveLocal(STORE_KEY + '_config', shopConfig);
+      applyShopConfig();
+      renderProducts();
+      closeConfigModal();
+    }
+
+    // Quản lý Modal Sản phẩm
+    function openAdminModal() {
+      if(CUSTOMER_MODE) return;
+      renderAdminTable();
+      resetProductForm();
+      document.getElementById('admin-modal').classList.remove('hidden');
+      if(window.lucide) lucide.createIcons();
+    }
+
+    function closeAdminModal() {
+      document.getElementById('admin-modal').classList.add('hidden');
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById('admin-table-body');
+      if(products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Kho đang trống. Thêm sản phẩm đầu tiên ở trên.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = products.map((p, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3">
+            <img src="${esc(validImage(p.image))}" class="w-10 h-10 object-cover rounded-lg border border-slate-200">
+          </td>
+          <td class="py-2.5 px-3 font-medium text-slate-800">${esc(p.name)}</td>
+          <td class="py-2.5 px-3 font-bold text-red-600">${formatMoney(p.price)}</td>
+          <td class="py-2.5 px-3 text-slate-500">${esc(p.category || '-')}</td>
+          <td class="py-2.5 px-3 text-right space-x-1">
+            <button onclick="editProduct('${p.id}')" class="px-2 py-1 text-blue-600 hover:bg-blue-50 rounded font-medium">Sửa</button>
+            <button onclick="deleteProduct('${p.id}')" class="px-2 py-1 text-red-600 hover:bg-red-50 rounded font-medium">Xóa</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function handleProductSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-id').value;
+      const name = document.getElementById('prod-name').value.trim();
+      const priceInput = document.getElementById('prod-price').value.trim();
+      const price = priceInput === '' ? null : Number(priceInput);
+      if(price !== null && (!Number.isFinite(price) || price < 0)) { alert('Giá phải là số từ 0 trở lên.'); return; }
+      const image = document.getElementById('prod-image').value.trim();
+      const category = document.getElementById('prod-category').value.trim();
+      const desc = document.getElementById('prod-desc').value.trim();
+      const isBadge = document.getElementById('prod-badge').checked;
+
+      if(id) {
+        // Cập nhật sản phẩm
+        const index = products.findIndex(p => p.id === id);
+        if(index !== -1) {
+          products[index] = {
+            ...products[index],
+            name, price, image, images: [image, ...(products[index].images || []).slice(1)], category, desc,
+            badge: isBadge ? 'Bán chạy' : ''
+          };
+        }
+      } else {
+        // Thêm sản phẩm mới
+        const newProduct = {
+          id: 'p_' + Date.now(),
+          name, price, image, category, desc,
+          badge: isBadge ? 'Mới' : ''
+        };
+        products.unshift(newProduct);
+      }
+
+      saveLocal(STORE_KEY + '_products', products);
+      renderAdminTable();
+      renderCategories();
+      renderProducts();
+      resetProductForm();
+    }
+
+    function editProduct(id) {
+      const p = products.find(prod => prod.id === id);
+      if(!p) return;
+      document.getElementById('prod-id').value = p.id;
+      document.getElementById('prod-name').value = p.name;
+      document.getElementById('prod-price').value = p.price ?? '';
+      document.getElementById('prod-image').value = p.image;
+      document.getElementById('prod-category').value = p.category || '';
+      document.getElementById('prod-desc').value = p.desc || '';
+      document.getElementById('prod-badge').checked = !!p.badge;
+
+      document.getElementById('form-action-title').innerHTML = '<i data-lucide="edit-3" class="w-4 h-4 text-amber-500"></i> Đang chỉnh sửa sản phẩm';
+      document.getElementById('btn-submit-prod').innerText = 'Cập Nhật';
+      document.getElementById('btn-cancel-edit').classList.remove('hidden');
+      if(window.lucide) lucide.createIcons();
+    }
+
+    function resetProductForm() {
+      document.getElementById('product-form').reset();
+      document.getElementById('prod-id').value = '';
+      document.getElementById('form-action-title').innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4 text-blue-600"></i> Thêm Sản Phẩm Mới';
+      document.getElementById('btn-submit-prod').innerText = 'Lưu Sản Phẩm';
+      document.getElementById('btn-cancel-edit').classList.add('hidden');
+      if(window.lucide) lucide.createIcons();
+    }
+
+    function deleteProduct(id) {
+      if(confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi danh sách?')) {
+        products = products.filter(p => p.id !== id);
+        saveLocal(STORE_KEY + '_products', products);
+        renderAdminTable();
+        renderCategories();
+        renderProducts();
+      }
+    }
+
+
+    function download(name, body, type) {
+      const u=URL.createObjectURL(new Blob([body],{type}));
+      const a=document.createElement('a'); a.href=u; a.download=name; a.click();
+      setTimeout(()=>URL.revokeObjectURL(u),1000);
+    }
+    function exportBackup() {
+      download('du-lieu-trang-suc.json',JSON.stringify({config:shopConfig,products},null,2),'application/json');
+    }
+    function exportCustomer() {
+      if(!shopConfig.phone && !shopConfig.zalo) { alert('Hãy điền số điện thoại hoặc Zalo thật trong Cài đặt trước khi xuất.'); return; }
+      if(!products.length) { alert('Hãy thêm ít nhất một sản phẩm trước khi xuất.'); return; }
+      let doc=document.documentElement.cloneNode(true);
+      doc.querySelectorAll('[data-editor],#config-modal,#admin-modal').forEach(e=>e.remove());
+      const payload=JSON.stringify({config:shopConfig,products}).replace(/</g,'\\u003c');
+      doc.querySelectorAll('script').forEach(el=>{
+        if(el.src) return;
+        el.textContent=el.textContent.replace('const PUBLISHED_DATA = null;',()=> 'const PUBLISHED_DATA = '+payload+';').replace('const CUSTOMER_MODE = false;','const CUSTOMER_MODE = true;');
+      });
+      download('index.html','<!DOCTYPE html>\n'+doc.outerHTML,'text/html;charset=utf-8');
+    }
+    document.getElementById('restore-file')?.addEventListener('change',async e=>{
+      try {
+        const data=JSON.parse(await e.target.files[0].text());
+        if(!data.config || typeof data.config.name!=='string' || !Array.isArray(data.products)) throw Error();
+        if(!data.products.every(p=>p && typeof p.id==='string' && /^[a-zA-Z0-9_-]+$/.test(p.id) && typeof p.name==='string' && (p.price===null || (Number.isFinite(p.price) && p.price>=0)) && typeof p.image==='string' && (!p.category || typeof p.category==='string') && (!p.desc || typeof p.desc==='string'))) throw Error();
+        if(!['phone','zalo','slogan','address'].every(k=>data.config[k]===undefined || typeof data.config[k]==='string')) throw Error();
+        if(!confirm('Thay dữ liệu trên máy bằng bản sao lưu?')) return;
+        shopConfig=data.config; products=data.products;
+        saveLocal(STORE_KEY+'_config',shopConfig);saveLocal(STORE_KEY+'_products',products);
+        currentCategory='all';initApp();
+      } catch { alert('File sao lưu không hợp lệ.'); }
+      e.target.value='';
+    });
+
+    // Khởi chạy
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
